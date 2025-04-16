@@ -13,10 +13,10 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = FastAPI()
 
-# Habilitar CORS
+# Middleware de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ou substitua pelo domínio da sua interface, ex: ["https://leads-interface1.onrender.com"]
+    allow_origins=["*"],  # Ou especifique: ["https://leads-interface1.onrender.com"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
