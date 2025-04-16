@@ -1,28 +1,33 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
 import os
 from supabase import create_client, Client
+from dotenv import load_dotenv
+
+# Carrega as variáveis do .env
+load_dotenv()
 
 # Variáveis de ambiente
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
+# Criação do cliente Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Criação da aplicação FastAPI
 app = FastAPI()
 
-# Middleware de CORS
+# Configuração do CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Ou especifique: ["https://leads-interface1.onrender.com"]
+    allow_origins=["*"],  # Pode substituir "*" pelo domínio do seu front-end
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Modelo do lead
+# Modelo de dados do Lead
 class Lead(BaseModel):
     nome: str
     telefone: str
