@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
-from supabase import create_client, Client
 import os
+from supabase import create_client, Client
 
-app = FastAPI()
-
-# Conexão com o Supabase
+# Variáveis de ambiente
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+app = FastAPI()
 
 # Modelo do lead
 class Lead(BaseModel):
@@ -19,17 +20,15 @@ class Lead(BaseModel):
     vendedor: str
     classificacao: str
 
-# Recebe um novo lead e salva no Supabase
+# Rota para criar um novo lead
 @app.post("/leads")
-def receber_lead(lead: Lead):
-    response = supabase.table("leads").insert(lead.dict()).execute()
-    return {
-        "mensagem": f"Olá {lead.nome}, recebi seu interesse em {lead.carro}. Em breve um vendedor entrará em contato!",
-        "status": response.status_code
-    }
+def criar_lead(lead: Lead):
+    data = lead.dict()
+    resposta = supabase.table("leads1").insert(data).execute()
+    return {"mensagem": f"Lead de {lead.nome} recebido com sucesso."}
 
-# Retorna todos os leads armazenados no Supabase
+# Rota para listar todos os leads
 @app.get("/leads")
 def listar_leads():
-    response = supabase.table("leads").select("*").execute()
-    return response.data
+    resposta = supabase.table("leads1").select("*").execute()
+    return resposta.data
