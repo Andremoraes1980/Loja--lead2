@@ -42,7 +42,10 @@ def criar_lead(lead: Lead):
     try:
         data = lead.dict()
         resposta = supabase.table("leads").insert(data).execute()
-        return {"mensagem": "Lead criado com sucesso"}
+        return {
+            "mensagem": "Lead criado com sucesso",
+            "data": resposta.data  # Retorna os dados inseridos para confirmação
+        }
     except Exception as e:
         return {"erro": str(e)}
 
