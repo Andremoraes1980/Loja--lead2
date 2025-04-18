@@ -5,55 +5,52 @@ import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-# Carrega as variáveis do .env
+# Carrega variáveis do .env
 load_dotenv()
 
-# Variáveis de ambiente
+# Configuração do Supabase
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-# Verificação básica
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise Exception("SUPABASE_URL ou SUPABASE_KEY não configurados corretamente.")
 
-# Criação do cliente Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Criação da aplicação FastAPI
 app = FastAPI()
 
-# Configuração do CORS (permite acesso da sua interface hospedada)
+# CORS para permitir requisições do seu frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://leads-interface1.onrender.com"],  # Libere o domínio do frontend
+    allow_origins=["https://leads-interface1.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Modelo de dados do Lead
+# Modelo de dados para a tabela do Supabase
 class Lead(BaseModel):
     nome: str
     telefone: str
-    carro: str
-    vendedor: str
-    classificacao: str
+    veiculo: str
+    temperatura: str
+    origem: str
 
-# Rota para criar um novo lead
+# Endpoint para criar um lead
 @app.post("/leads")
 def criar_lead(lead: Lead):
     try:
         data = lead.dict()
-        resposta = supabase.table("leads1").insert(data).execute()
-        return {"mensagem": f"Lead de {lead.nome} recebido com sucesso."}
+        resposta = supabase.table("leads").insert(data).execute()
+        return {"mensagem": "Lead criado com sucesso"}
     except Exception as e:
         return {"erro": str(e)}
 
-# Rota para listar todos os leads
+# Endpoint para listar todos os leads
 @app.get("/leads")
 def listar_leads():
     try:
-        resposta = supabase.table("leads1").select("*").execute()
+        resposta = supabase.table("leads").select("*").execute()
         return resposta.data
     except Exception as e:
         return {"erro": str(e)}
