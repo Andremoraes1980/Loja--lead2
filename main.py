@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
@@ -28,7 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Modelo para criação de lead
+# Modelo de dados para a tabela do Supabase
 class Lead(BaseModel):
     nome: str
     telefone: str
@@ -36,30 +36,25 @@ class Lead(BaseModel):
     temperatura: str
     origem: str
 
-# Modelo para atualização de status
-class StatusUpdate(BaseModel):
-    status: str
-
-# Criar novo lead
+# Endpoint para criar um lead com logs de depuração
 @app.post("/leads")
 def criar_lead(lead: Lead):
     try:
         data = lead.dict()
-        data["status"] = "nova-proposta"  # Status padrão ao criar
-        print(">>> Dados recebidos:", data)
+        print(">>> Dados recebidos do frontend:", data)  # Log do que foi enviado
 
         resposta = supabase.table("leads").insert(data).execute()
-        print(">>> Supabase resposta:", resposta)
+        print(">>> Resposta do Supabase:", resposta)  # Log da resposta do Supabase
 
         return {
             "mensagem": "Lead criado com sucesso",
             "data": resposta.data
         }
     except Exception as e:
-        print(">>> ERRO ao criar lead:", str(e))
+        print(">>> ERRO ao criar lead:", str(e))  # Log de erro
         return {"erro": str(e), "mensagem": "Erro ao criar lead"}
 
-# Listar todos os leads
+# Endpoint para listar todos os leads
 @app.get("/leads")
 def listar_leads():
     try:
@@ -68,18 +63,3 @@ def listar_leads():
     except Exception as e:
         print(">>> ERRO ao listar leads:", str(e))
         return {"erro": str(e)}
-
-# Atualizar status do lead
-@app.put("/leads/{lead_id}/status")
-def atualizar_status(lead_id: int, status_update: StatusUpdate):
-    try:
-        resposta = supabase.table("leads").update({"status": status_update.status}).eq("id", lead_id).execute()
-        if not resposta.data:
-            raise HTTPException(status_code=404, detail="Lead não encontrado")
-        return {
-            "mensagem": "Status atualizado com sucesso",
-            "data": resposta.data
-        }
-    except Exception as e:
-        print(">>> ERRO ao atualizar status:", str(e))
-        return {"erro": str(e), "mensagem": "Erro ao atualizar status"}
